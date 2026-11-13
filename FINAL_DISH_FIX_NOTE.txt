@@ -1,0 +1,1 @@
+Updated specific dishes to use clean placeholders instead of suspicious images: Egg Biryani, Veg Club Sandwich, Garlic Bread, Chicken Tikka Roll.

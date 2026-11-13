@@ -1,0 +1,72 @@
+@ordering = http://localhost:8080
+@loyalty = http://localhost:8081
+# Replace these IDs with actual values returned by your running database.
+@foodId = 1
+@unavailableFoodId = 3
+@orderId = 1
+@customerId = 1
+@temporaryMenuId = 5
+
+### Read menu and inspect real IDs
+GET {{ordering}}/api/menu
+
+### Derived name and availability query
+GET {{ordering}}/api/menu?name=piz&available=true
+
+### Create order (201); use actual available foodId
+POST {{ordering}}/api/orders
+Content-Type: application/json
+
+{"customerName":"Rishabh","foodItemId":{{foodId}},"quantity":2}
+
+### Retrieve the order you just created
+GET {{ordering}}/api/orders/{{orderId}}
+
+### Retrieve history by customer name
+GET {{ordering}}/api/orders?customerName=Rishabh
+
+### Retrieve history by customer ID (derived query)
+GET {{ordering}}/api/orders?customerId={{customerId}}
+
+### Invalid quantity (400)
+POST {{ordering}}/api/orders
+Content-Type: application/json
+
+{"customerName":"Rishabh","foodItemId":{{foodId}},"quantity":0}
+
+### Unavailable item (409)
+POST {{ordering}}/api/orders
+Content-Type: application/json
+
+{"customerName":"Rishabh","foodItemId":{{unavailableFoodId}},"quantity":1}
+
+### CREATE a temporary menu item; copy returned id to temporaryMenuId
+POST {{ordering}}/api/menu
+Content-Type: application/json
+
+{"name":"Soup","price":90.00,"available":true}
+
+### READ
+GET {{ordering}}/api/menu/{{temporaryMenuId}}
+
+### UPDATE
+PUT {{ordering}}/api/menu/{{temporaryMenuId}}
+Content-Type: application/json
+
+{"name":"Tomato Soup","price":95.00,"available":false}
+
+### DELETE (204); this temporary item must not have an order
+DELETE {{ordering}}/api/menu/{{temporaryMenuId}}
+
+### Confirm deletion (404)
+GET {{ordering}}/api/menu/{{temporaryMenuId}}
+
+### Frontend-facing loyalty proxy (microservices profile required)
+GET {{ordering}}/api/loyalty/leaderboard
+
+### Independent loyalty microservice endpoint
+GET {{loyalty}}/api/leaderboard
+
+# The service-to-service POST /api/rewards/orders contract is implemented in
+# OrderRewardRequest. Orders must normally be sent through /api/orders so the
+# saved purchase and the awarded points stay aligned.
